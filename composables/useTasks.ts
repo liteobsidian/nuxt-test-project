@@ -1,33 +1,36 @@
-import type {Ref} from "vue";
-import type {Task} from "~/types/task";
+import type { Task } from '@/types/task'
 
 export const useTasks = () => {
-    const tasks: Ref<Task[]> = useState('tasks', () => [])
+    const { data: tasks = [], status, refresh } = useAsyncData<Task[]>('tasks', () => $fetch('/api/tasks'))
 
-    const addTask = (task: { title: string; description: string }) => {
-        tasks.value.push({
-            id: Date.now(), // простая генерация id
-            ...task,
-            createdAt: new Date(),
-            completed: false,
+    const addTask = async (task: Pick<Task, 'title' | 'description'>) => {
+        await $fetch('/api/tasks', {
+            method: 'POST',
+            body: task
         })
+        await refresh()
     }
 
-    const toggleTask = (id: number) => {
-        const task = tasks.value.find((t) => t.id === id)
-        if (task) {
-            task.completed = !task.completed
-        }
+    const updateTask = async (id: number, data: Partial<Task>) => {
+        await $fetch(`/api/tasks/${id}`, {
+            method: 'PATCH',
+            body: data
+        })
+        await refresh()
     }
 
-    const deleteTask = (id: number) => {
-        tasks.value = tasks.value.filter((t) => t.id !== id)
+    const deleteTask = async (id: number) => {
+        await $fetch(`/api/tasks/${id}`, {
+            method: 'DELETE'
+        })
+        await refresh()
     }
 
     return {
         tasks,
+        status,
         addTask,
-        toggleTask,
-        deleteTask,
+        updateTask,
+        deleteTask
     }
 }
