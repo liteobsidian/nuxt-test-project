@@ -14,19 +14,17 @@
 </template>
 
 <script setup lang="ts">
+const { createTask } = useTasks()
+
 const title = ref('')
 const description = ref('')
 
 const handleSubmit = async () => {
-  if (title.value.trim() !== '') {
-    await $fetch('/api/tasks', {
-      method: 'POST',
-      body: {
-        title: title.value,
-        description: description.value,
-      },
-    })
+  try {
+    await createTask(title.value, description.value)
     navigateTo('/')
+  } catch (e) {
+    console.error(e)
   }
 }
 </script>

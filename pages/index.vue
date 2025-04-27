@@ -16,21 +16,48 @@
         <UButton color="error" variant="soft" @click="removeTask(task.id)">Удалить</UButton>
       </li>
     </ul>
+
+    <USwitch class="mt-4" v-model="isShowHeavyTaskList" label="Отрисовать список"></USwitch>
+
+    <div v-if="isShowHeavyTaskList">
+      <h2 class="text-xl font-semibold mb-2">Большой компонент</h2>
+
+      <LazyClientOnly>
+        <Suspense>
+          <template #default>
+            <HeavyTaskListInit />
+          </template>
+          <template #fallback>
+            <div class="text-gray-500">Загрузка тяжелого компонента...</div>
+          </template>
+        </Suspense>
+      </LazyClientOnly>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useTasks } from '@/composables/useTasks'
+import type {Task} from "~/types/task";
+const HeavyTaskListInit = defineAsyncComponent(() => import('~/components/HeavyTaskList.vue'))
+const isShowHeavyTaskList = ref(false)
 
 const { tasks, status, updateTask, deleteTask } = useTasks()
 
-async function toggleCompleted(task: any) {
-  await updateTask(task.id, { completed: task.completed })
+const toggleCompleted = async (task: Task) => {
+  try {
+    await updateTask(task.id, { completed: task.completed })
+  } catch (e) {
+    console.error(e)
+  }
 }
 
-async function removeTask(id: number) {
-  if (confirm('Точно удалить задачу?')) {
+const removeTask = async (id: number) => {
+  if (!confirm('Точно удалить задачу?')) return
+  try {
     await deleteTask(id)
+  } catch (e) {
+    console.error(e)
   }
 }
 </script>
