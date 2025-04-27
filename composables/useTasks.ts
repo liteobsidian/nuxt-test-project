@@ -1,10 +1,5 @@
-export type Task = {
-    id: number;
-    title: string;
-    description: string;
-    createdAt: Date;
-    completed: boolean;
-}
+import type {Ref} from "vue";
+import type {Task} from "~/types/task";
 
 export const useTasks = () => {
     const tasks: Ref<Task[]> = useState('tasks', () => [])

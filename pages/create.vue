@@ -17,13 +17,14 @@
 const title = ref('')
 const description = ref('')
 
-const { addTask } = useTasks()
-
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (title.value.trim() !== '') {
-    addTask({
-      title: title.value,
-      description: description.value,
+    await $fetch('/api/tasks', {
+      method: 'POST',
+      body: {
+        title: title.value,
+        description: description.value,
+      },
     })
     navigateTo('/')
   }
